@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-from collections import deque
+from collections import deq
+
 
 
 mydataset = {
