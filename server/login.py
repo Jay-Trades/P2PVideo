@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Security
 from database import get_db
 from sqlite3 import Connection
 from typing import Generator
 import uuid
 import bcrypt
-import base64
+from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
+
 
 #test users
 #jay@gmail.com pw:test2 username:test1
@@ -12,10 +13,13 @@ import base64
 
 
 router = APIRouter()
+access_security = JwtAccessBearer(secret_key="jfdlsajflskajdfklaaaa", auto_error=True)
+
 
 # def get_db_conn() -> Generator:
 #     with get_db() as db:
 #         yield db
+
 def hash_password(password):
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
@@ -80,7 +84,16 @@ def login(email: str, username: str, password: str, db: Connection = Depends(get
 
     if is_valid:
         #logged in logic
-        return {"message": "Login succesful"}
+        subject = {"username": username, "role": "user"}
+        return {"access_token": access_security.create_access_token(subject=subject)}
+        # return {"message": "We good"}
+
     else:
         return {"message": "Login failed, email password combination does not match"}
 
+@router.get("/protected-route")
+def protected_route(credentials: JwtAuthorizationCredentials = Security(access_security)):
+    #you can turn an obj into a dict to see whats inside it with __dict__
+    credentials_dict = credentials.__dict__ 
+    print(credentials_dict)
+    return {"message": f"Hello, {credentials.subject['username']}!"}
