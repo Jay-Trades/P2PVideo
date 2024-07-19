@@ -37,7 +37,7 @@ def verify_password(plain_password, hashed_password):
 
     
 @router.post("/registration")
-def registration(email: str, username: str, password: str, db: Connection = Depends(get_db)):
+async def registration(email: str, username: str, password: str, db: Connection = Depends(get_db)):
     #depends just calls a callable before going into the function. In this case setting db connection to db. It is auto injected
     
     cursor = db.cursor()
@@ -73,7 +73,7 @@ def registration(email: str, username: str, password: str, db: Connection = Depe
     # raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
 @router.post("/login")
-def login(email: str, username: str, password: str, db: Connection = Depends(get_db)):
+async def login(email: str, username: str, password: str, db: Connection = Depends(get_db)):
     cursor = db.cursor()
     #check if email is in the DB if not return error message
     cursor.execute('SELECT * FROM User WHERE email == ?',(email,))
@@ -100,7 +100,7 @@ def login(email: str, username: str, password: str, db: Connection = Depends(get
         return {"message": "Login failed, email password combination does not match"}
 
 @router.get("/protected-route")
-def protected_route(credentials: JwtAuthorizationCredentials = Security(access_security)):
+async def protected_route(credentials: JwtAuthorizationCredentials = Security(access_security)):
     #you can turn an obj into a dict to see whats inside it with __dict__
     credentials_dict = credentials.__dict__ 
     print(credentials_dict)
