@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Security
+from fastapi import APIRouter, Depends, HTTPException, status, Security, Request
+from fastapi.responses import JSONResponse
 from database import get_db
 from sqlite3 import Connection
 from typing import Generator
@@ -7,13 +8,18 @@ import bcrypt
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
 
 
+
+
 #test users
 #jay@gmail.com pw:test2 username:test1
-#bboynamu@gmail.com pw:bboykoreice0 username:lethalasian
+#bboynamu@gmail.com pw:bboykoreice0 username:lethalasian 
+#jayleonchen@gmail.com  pw:13579j username:koreice0ß
 
 
 router = APIRouter()
 access_security = JwtAccessBearer(secret_key="jfdlsajflskajdfklaaaa", auto_error=True)
+#auto_error: If set to True, an HTTPException will be automatically raised if the token is invalid or missing.
+# breakpoint()
 
 
 # def get_db_conn() -> Generator:
@@ -28,6 +34,8 @@ def hash_password(password):
 def verify_password(plain_password, hashed_password):
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password)
 
+
+    
 @router.post("/registration")
 def registration(email: str, username: str, password: str, db: Connection = Depends(get_db)):
     #depends just calls a callable before going into the function. In this case setting db connection to db. It is auto injected
